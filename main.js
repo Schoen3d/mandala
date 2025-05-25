@@ -52,7 +52,7 @@ function init() {
     camera.position.set(0, 0, 2); // Kamera-Position (anpassen, falls Modell zu klein/groß)
 
     // 3. Renderer erstellen
-    renderer = new THREE.WebGLRenderer({ antialias: true }); // Antialiasing für glattere Kanten
+    renderer = new THREE.WebGLRenderer({ antialiasing: true }); // Antialiasing für glattere Kanten
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement); // Canvas zum HTML-Body hinzufügen
 
@@ -106,7 +106,7 @@ function loadModel(path) {
                     if (Array.isArray(object.material)) {
                         object.material.forEach(material => material.dispose());
                     } else {
-                        object.material.dispose();
+                        material.dispose();
                     }
                 }
             }
