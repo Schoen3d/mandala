@@ -2,8 +2,8 @@
 console.log("main.js wird ausgeführt - Version: " + new Date().toLocaleTimeString());
 // ================================================================
 
-// --- WICHTIG: JETZT IMPORT-STATEMENTS VERWENDEN UND PFADE ANPASSEN! ---
-// Importiere THREE als Modul
+// --- WICHTIG: JETZT IMPORT-STATEMENTS VERWENDEN UND PFADE KORRIGIEREN! ---
+// Importiere THREE als Modul mit KORREKTEM RELATIVEN PFAD
 import * as THREE from './libs/three/three.module.min.js';
 // Importiere Loader und Controls als Module (Pfade MÜSSEN zu deinen lokalen Dateien passen!)
 import { FBXLoader } from './libs/three/FBXLoader.js';
