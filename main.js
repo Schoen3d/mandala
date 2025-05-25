@@ -4,6 +4,9 @@ console.log("main.js wird ausgeführt - Version: " + new Date().toLocaleTimeStri
 
 // --- WICHTIG: ALLE IMPORT-STATEMENTS MÜSSEN HIER ENTFERNT WERDEN! ---
 // Da wir Three.js jetzt als klassisches Skript laden, ist THREE global verfügbar.
+// import * as THREE from 'https://unpkg.com/three@0.164.1/build/three.module.js'; // Diese Zeile MUSS WEG!
+// import { FBXLoader } from 'https://unpkg.com/three@0.164.1/examples/jsm/loaders/FBXLoader.js'; // Diese Zeile MUSS WEG!
+// import { OrbitControls } from 'https://unpkg.com/three@0.164.1/examples/jsm/controls/OrbitControls.js'; // Diese Zeile MUSS WEG!
 
 
 // --- Konfiguration ---
