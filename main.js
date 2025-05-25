@@ -2,8 +2,12 @@
 console.log("main.js wird ausgeführt - Version: " + new Date().toLocaleTimeString());
 // ================================================================
 
-// --- WICHTIG: ALLE IMPORT-STATEMENTS MÜSSEN HIER ENTFERNT WERDEN! ---
-// Da wir Three.js jetzt als klassisches Skript laden, ist THREE global verfügbar.
+// --- WICHTIG: JETZT IMPORT-STATEMENTS VERWENDEN UND PFADE ANPASSEN! ---
+// Importiere THREE als Modul
+import * as THREE from './libs/three/three.module.min.js';
+// Importiere Loader und Controls als Module (Pfade MÜSSEN zu deinen lokalen Dateien passen!)
+import { FBXLoader } from './libs/three/FBXLoader.js';
+import { OrbitControls } from './libs/three/OrbitControls.js';
 
 
 // --- Konfiguration ---
@@ -57,8 +61,6 @@ function init() {
     document.body.appendChild(renderer.domElement); // Canvas zum HTML-Body hinzufügen
 
     // 4. Beleuchtung hinzufügen
-    // FBX-Modelle können manchmal eigene Beleuchtungsinformationen enthalten,
-    // aber wir fügen Standardlichter hinzu, um sicherzustellen, dass alles gut beleuchtet ist.
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.7); // Sanfte Umgebungsbeleuchtung
     scene.add(ambientLight);
 
@@ -72,7 +74,7 @@ function init() {
 
 
     // 5. OrbitControls hinzufügen (ermöglicht das Drehen/Zoomen mit der Maus)
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls = new OrbitControls(camera, renderer.domElement); // Hier wird OrbitControls direkt verwendet
     controls.enableDamping = true; // Für eine "weichere" Bewegung
     controls.dampingFactor = 0.25;
     controls.screenSpacePanning = false; // Verhindert Panning in der Ebene
@@ -87,12 +89,11 @@ function init() {
 
     // UI-Elemente initialisieren
     createColorOptions();
-    // Muster-Buttons werden später dynamisch erstellt, wenn wir mehrere Modelle haben
 }
 
 // --- Modell laden Funktion (ANGEPASST FÜR FBX) ---
 function loadModel(path) {
-    const loader = new THREE.FBXLoader();
+    const loader = new FBXLoader(); // Hier wird FBXLoader direkt verwendet
 
     // Entferne das vorherige Modell, falls vorhanden
     if (currentModel) {
@@ -100,8 +101,6 @@ function loadModel(path) {
         currentModel.traverse((object) => {
             if (object.isMesh) {
                 if (object.geometry) object.geometry.dispose();
-                // Bei FBX kann das Material anders sein, auch wenn es ein Standardmaterial ist,
-                // wir müssen sicherstellen, dass wir es richtig entsorgen.
                 if (object.material) {
                     if (Array.isArray(object.material)) {
                         object.material.forEach(material => material.dispose());
@@ -123,30 +122,24 @@ function loadModel(path) {
             scene.add(currentModel);
 
             // Skalierung anpassen, falls das Modell zu groß oder zu klein ist
-            // Berechne die Bounding Box des Modells
             const box = new THREE.Box3().setFromObject(currentModel);
             const size = box.getSize(new THREE.Vector3());
             const maxDim = Math.max(size.x, size.y, size.z);
-            const scale = 1.0 / maxDim; // Skaliere das Modell so, dass die größte Dimension 1.0 beträgt
+            const scale = 1.0 / maxDim;
             currentModel.scale.set(scale, scale, scale);
 
             // Positionieren des Modells im Zentrum
-            box.setFromObject(currentModel); // Bounding Box neu berechnen nach Skalierung
-            box.getCenter(currentModel.position).negate(); // Modell zentrieren
+            box.setFromObject(currentModel);
+            box.getCenter(currentModel.position).negate();
 
             // Finde die Meshes für Vorder- und Rückseite
-            // Bei FBX-Modellen können die Namen der Kinder komplexer sein,
-            // oft sind es "Null"-Objekte, die die Meshes enthalten, oder die Meshes selbst.
             currentModel.traverse((child) => {
                 if (child.isMesh) {
-                    console.log("Gefundenes Mesh (FBX):", child.name); // HILFREICH ZUM DEBUGGEN DER NAMEN!
-                    // Ersetze das vorhandene Material durch ein MeshStandardMaterial
-                    // oder erstelle eines, wenn es keins hat.
+                    console.log("Gefundenes Mesh (FBX):", child.name);
                     child.material = new THREE.MeshStandardMaterial({
-                        color: child.material ? child.material.color : 0xcccccc // Behalte die ursprüngliche Farbe bei, falls vorhanden
+                        color: child.material ? child.material.color : 0xcccccc
                     });
 
-                    // Nutze includes() um zu prüfen, ob der Name einen Teil des definierten Strings enthält
                     if (child.name.includes(FRONT_MESH_NAME)) {
                         frontMesh = child;
                     } else if (child.name.includes(BACK_MESH_NAME)) {
@@ -157,18 +150,14 @@ function loadModel(path) {
 
             if (!frontMesh || !backMesh) {
                 console.warn("Konnte nicht beide Meshes ('" + FRONT_MESH_NAME + "' und '" + BACK_MESH_NAME + "') im FBX-Modell finden. Bitte die Namen in main.js überprüfen oder die Konsolen-Ausgabe 'Gefundenes Mesh (FBX):' prüfen.");
-                // Wenn wir die Meshes nicht finden, können wir die Farbänderung nicht durchführen.
-                // Hier könnten wir auch ein Fallback-Material setzen.
             } else {
-                // Setze initiale Farben für die gefundenen Meshes
-                setColorForPart('front', COLORS[2].hex); // Z.B. Hellrosa als Standard
-                setColorForPart('back', COLORS[3].hex);  // Z.B. Dunkelgrau als Standard
+                setColorForPart('front', COLORS[2].hex);
+                setColorForPart('back', COLORS[3].hex);
                 updateColorSelection(COLORS[2].hex, 'front');
                 updateColorSelection(COLORS[3].hex, 'back');
             }
         },
         (xhr) => {
-            // Optional: Fortschritt beim Laden anzeigen
             console.log((xhr.loaded / xhr.total * 100) + '% geladen');
         },
         (error) => {
@@ -191,23 +180,18 @@ function setColorForPart(part, hexColor) {
         return;
     }
 
-    // Bei FBX-Modellen ist es üblich, dass die Meshes ein MeshStandardMaterial haben.
-    // Wenn dein Modell komplexe Materialien hat, musst du hier evtl. anpassen.
     if (targetMesh.material) {
         if (Array.isArray(targetMesh.material)) {
-            // Wenn das Material ein Array ist (Multi-Material), ändere alle Farben
             targetMesh.material.forEach(material => {
-                // Stellen Sie sicher, dass es ein Farbmaterial ist (z.B. MeshStandardMaterial)
                 if (material.color) {
                     material.color.set(color);
                     material.needsUpdate = true;
                 }
             });
         } else {
-            // Einzelnes Material
             if (targetMesh.material.color) {
                 targetMesh.material.color.set(color);
-                targetMesh.material.needsUpdate = true; // Wichtig, damit die Änderung sichtbar wird
+                targetMesh.material.needsUpdate = true;
             }
         }
     } else {
@@ -221,7 +205,6 @@ function createColorOptions() {
     const colorOptionsBackDiv = document.getElementById('colorOptionsBack');
 
     COLORS.forEach(color => {
-        // Für Vorderseite
         const optionFront = document.createElement('div');
         optionFront.className = 'color-option';
         optionFront.style.backgroundColor = color.hex;
@@ -233,7 +216,6 @@ function createColorOptions() {
         });
         colorOptionsFrontDiv.appendChild(optionFront);
 
-        // Für Rückseite
         const optionBack = document.createElement('div');
         optionBack.className = 'color-option';
         optionBack.style.backgroundColor = color.hex;
@@ -251,7 +233,7 @@ function updateColorSelection(selectedHex, part) {
     const container = part === 'front' ? document.getElementById('colorOptionsFront') : document.getElementById('colorOptionsBack');
     const options = container.querySelectorAll('.color-option');
     options.forEach(option => {
-        if (option.dataset.hex.toLowerCase() === selectedHex.toLowerCase()) { // Case-insensitive Vergleich
+        if (option.dataset.hex.toLowerCase() === selectedHex.toLowerCase()) {
             option.classList.add('selected');
         } else {
             option.classList.remove('selected');
@@ -262,10 +244,10 @@ function updateColorSelection(selectedHex, part) {
 
 // --- Animation Loop ---
 function animate() {
-    requestAnimationFrame(animate); // Fordert den nächsten Frame an
+    requestAnimationFrame(animate);
 
-    controls.update(); // Aktualisiert die OrbitControls
-    renderer.render(scene, camera); // Rendert die Szene
+    controls.update();
+    renderer.render(scene, camera);
 }
 
 // --- Fenstergrößenänderung ---
@@ -275,9 +257,6 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-// Startet die Anwendung, wenn ALLE Ressourcen (einschließlich Bilder, Skripte) geladen sind
-// WICHTIG: window.onload oder DOMContentLoaded, da wir jetzt keine Module mehr verwenden.
-window.onload = () => {
-    init();
-    animate();
-};
+// Startet die Anwendung, wenn das DOM geladen ist (bei Modulen ist das quasi sofort der Fall)
+init();
+animate();
