@@ -2,16 +2,16 @@
 console.log("main.js wird ausgeführt - Version: " + new Date().toLocaleTimeString());
 // ================================================================
 
-// --- WICHTIG: JETZT IMPORT-STATEMENTS VERWENDEN UND PFADE KORRIGIEREN! ---
-// Importiere THREE als Modul mit KORREKTEM RELATIVEN PFAD
-import * as THREE from './libs/three/three.module.min.js';
+// --- WICHTIG: JETZT IMPORT-STATEMENTS VERWENDEN UND ABSOLUTE PFADE KORRIGIEREN! ---
+// Importiere THREE als Modul mit KORREKTEM ABSOLUTEN PFAD
+import * as THREE from '/libs/three/three.module.min.js';
 // Importiere Loader und Controls als Module (Pfade MÜSSEN zu deinen lokalen Dateien passen!)
-import { FBXLoader } from './libs/three/FBXLoader.js';
-import { OrbitControls } from './libs/three/OrbitControls.js';
+import { FBXLoader } from '/libs/three/FBXLoader.js';
+import { OrbitControls } from '/libs/three/OrbitControls.js';
 
 
 // --- Konfiguration ---
-const MODEL_PATH = './mandala_01.fbx'; // Pfad zu deinem 3D-Modell (JETZT .fbx)
+const MODEL_PATH = './mandala_01.fbx'; // Pfad zu deinem 3D-Modell (dieser Pfad bleibt relativ zur main.js!)
 // ACHTUNG: Passe diese Namen an die tatsächlichen Namen der Körper/Komponenten an,
 // die du in Fusion 360 vergeben hast und die im FBX erhalten bleiben!
 const FRONT_MESH_NAME = 'Mandala_Schicht_A'; // Beispielname aus Fusion 360
@@ -68,7 +68,7 @@ function init() {
     directionalLight.position.set(0, 0, 1).normalize();
     scene.add(directionalLight);
 
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.3); // Gerichtetes Licht von hinten/oben
+    const directionalLight2 = new THREE.DirectionionalLight(0xffffff, 0.3); // Gerichtetes Licht von hinten/oben
     directionalLight2.position.set(0, 1, -1).normalize();
     scene.add(directionalLight2);
 
