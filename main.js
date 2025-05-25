@@ -2,10 +2,8 @@
 console.log("main.js wird ausgeführt - Version: " + new Date().toLocaleTimeString());
 // ================================================================
 
-// --- WICHTIG: Die Import-Statements MÜSSEN HIER WIEDER HIN! ---
-import * as THREE from 'https://unpkg.com/three@0.164.1/build/three.module.js';
-import { FBXLoader } from 'https://unpkg.com/three@0.164.1/examples/jsm/loaders/FBXLoader.js';
-import { OrbitControls } from 'https://unpkg.com/three@0.164.1/examples/jsm/controls/OrbitControls.js';
+// --- WICHTIG: ALLE IMPORT-STATEMENTS MÜSSEN HIER ENTFERNT WERDEN! ---
+// Da wir Three.js jetzt als klassisches Skript laden, ist THREE global verfügbar.
 
 
 // --- Konfiguration ---
@@ -74,7 +72,7 @@ function init() {
 
 
     // 5. OrbitControls hinzufügen (ermöglicht das Drehen/Zoomen mit der Maus)
-    controls = new OrbitControls(camera, renderer.domElement); // !!! KEIN THREE. HIER !!!
+    controls = new THREE.OrbitControls(camera, renderer.domElement); // HIER WIEDER THREE.OrbitControls
     controls.enableDamping = true; // Für eine "weichere" Bewegung
     controls.dampingFactor = 0.25;
     controls.screenSpacePanning = false; // Verhindert Panning in der Ebene
@@ -94,7 +92,7 @@ function init() {
 
 // --- Modell laden Funktion (ANGEPASST FÜR FBX) ---
 function loadModel(path) {
-    const loader = new FBXLoader(); // !!! KEIN THREE. HIER !!!
+    const loader = new THREE.FBXLoader(); // HIER WIEDER THREE.FBXLoader
 
     // Entferne das vorherige Modell, falls vorhanden
     if (currentModel) {
@@ -277,8 +275,9 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-// Startet die Anwendung, wenn das DOM geladen ist
-document.addEventListener('DOMContentLoaded', () => {
+// Startet die Anwendung, wenn ALLE Ressourcen (einschließlich Bilder, Skripte) geladen sind
+// WICHTIG: window.onload oder DOMContentLoaded, da wir jetzt keine Module mehr verwenden.
+window.onload = () => {
     init();
     animate();
-});
+};
